@@ -5,7 +5,6 @@
 File::File(std::string path, char* content, int contentSize)
 {
     _Create(path, content, contentSize);
-    std::cout<<path<<std::endl;
 }
 
 File::~File()

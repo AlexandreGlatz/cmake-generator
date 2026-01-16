@@ -59,10 +59,14 @@ void FolderManager::CreateArchitecture()
 
 void FolderManager::GenerateContents(char **projectNames, int size)
 {
+    std::string base(projectNames[0]);
+    std::string basePath = base.substr(0, base.find_last_of("/"));
+            
     PROJECT* root = new PROJECT();
     root->name = projectNames[1];
     // TODO Turn this into a function
-    std::string tmp = Utils::GetTemplate(FILE_CONTENT::CMAKE_GEN);
+    std::string tmp = Utils::GetTemplate(FILE_CONTENT::CMAKE_GEN, basePath);
+    std::cout<<tmp.size()<<std::endl;
     Utils::StringReplace(tmp, "<NAME>", projectNames[1]);
     root->fileContents[FILE_CONTENT::CMAKE_GEN] = new FILE_INFO(tmp.data(), tmp.size());
     //
@@ -70,29 +74,30 @@ void FolderManager::GenerateContents(char **projectNames, int size)
 
     PROJECT* app = new PROJECT();
     app->name = projectNames[2];
-    tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::CMAKE_APP);
+    tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::CMAKE_APP, basePath);
     Utils::StringReplace(tmp, "<NAME>", projectNames[2]);
     app->fileContents[FILE_CONTENT::CMAKE_APP] = new FILE_INFO(tmp.data(), tmp.size());
 
-    tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::MAIN);
+    tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::MAIN, basePath);
     app->fileContents[FILE_CONTENT::MAIN] = new FILE_INFO(tmp.data(), tmp.size());
     
     m_projects.push_back(app);
-    for(int i = 3; i < size - 2; ++i)
+
+    for(int i = 3; i < size; ++i)
     {
         PROJECT* lib = new PROJECT();
         lib->name = projectNames[i];
-        tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::CMAKE_LIB);
-        Utils::StringReplace(tmp, "<NAME>", projectNames[i]);
+        tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::CMAKE_LIB, basePath);
+        Utils::StringReplace(tmp, "<NAME>", lib->name);
         lib->fileContents[FILE_CONTENT::CMAKE_LIB] = new FILE_INFO(tmp.data(), tmp.size());
 
-        tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::INCLUDE);
+        tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::INCLUDE, basePath);
         Utils::StringReplace(tmp, "<NAME_INCLUDE>", Utils::ToUpper(lib->name));
-        Utils::StringReplace(tmp, "<NAME>", projectNames[i]);
+        Utils::StringReplace(tmp, "<NAME>", lib->name);
         lib->fileContents[FILE_CONTENT::INCLUDE] = new FILE_INFO(tmp.data(), tmp.size());
 
-        tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::SRC);
-        Utils::StringReplace(tmp, "<NAME>", projectNames[i]);
+        tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::SRC, basePath);
+        Utils::StringReplace(tmp, "<NAME>", lib->name);
         lib->fileContents[FILE_CONTENT::SRC] = new FILE_INFO(tmp.data(), tmp.size());
 
         m_projects.push_back(lib);
