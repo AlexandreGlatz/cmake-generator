@@ -6,9 +6,8 @@
 
 std::string Utils::StringReplace(std::string base, std::string tag, std::string replacement)
 {
-    if(base.find(tag) == std::string::npos)
-        return base;
-    base.replace(base.find(tag), tag.length(), replacement);
+    while(base.find(tag) != std::string::npos)
+        base.replace(base.find(tag), tag.length(), replacement);
     
     return base;
 }
@@ -50,7 +49,7 @@ std::string Utils::GetTemplate(FolderManager::FILE_CONTENT templateType, std::st
             return Utils::Parse(base + "/../res/templates/main_template.cpp");
             break;
         case FolderManager::FILE_CONTENT::SRC:
-            return Utils::Parse(base + "/../res/templates/main_template.cpp");
+            return Utils::Parse(base + "/../res/templates/src_template.cpp");
             break;
         default:
             return "";

@@ -66,8 +66,8 @@ void FolderManager::GenerateContents(char **projectNames, int size)
     root->name = projectNames[1];
     // TODO Turn this into a function
     std::string tmp = Utils::GetTemplate(FILE_CONTENT::CMAKE_GEN, basePath);
-    std::cout<<tmp.size()<<std::endl;
-    Utils::StringReplace(tmp, "<NAME>", projectNames[1]);
+    tmp = Utils::StringReplace(tmp, "<NAME>", projectNames[1]);
+    std::cout<<tmp<<std::endl;
     root->fileContents[FILE_CONTENT::CMAKE_GEN] = new FILE_INFO(tmp.data(), tmp.size());
     //
     m_projects.push_back(root);
@@ -75,7 +75,7 @@ void FolderManager::GenerateContents(char **projectNames, int size)
     PROJECT* app = new PROJECT();
     app->name = projectNames[2];
     tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::CMAKE_APP, basePath);
-    Utils::StringReplace(tmp, "<NAME>", projectNames[2]);
+    tmp = Utils::StringReplace(tmp, "<NAME>", projectNames[2]);
     app->fileContents[FILE_CONTENT::CMAKE_APP] = new FILE_INFO(tmp.data(), tmp.size());
 
     tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::MAIN, basePath);
@@ -88,16 +88,16 @@ void FolderManager::GenerateContents(char **projectNames, int size)
         PROJECT* lib = new PROJECT();
         lib->name = projectNames[i];
         tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::CMAKE_LIB, basePath);
-        Utils::StringReplace(tmp, "<NAME>", lib->name);
+        tmp = Utils::StringReplace(tmp, "<NAME>", lib->name);
         lib->fileContents[FILE_CONTENT::CMAKE_LIB] = new FILE_INFO(tmp.data(), tmp.size());
 
         tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::INCLUDE, basePath);
-        Utils::StringReplace(tmp, "<NAME_INCLUDE>", Utils::ToUpper(lib->name));
-        Utils::StringReplace(tmp, "<NAME>", lib->name);
+        tmp = Utils::StringReplace(tmp, "<NAME_INCLUDE>", Utils::ToUpper(lib->name));
+        tmp = Utils::StringReplace(tmp, "<NAME>", lib->name);
         lib->fileContents[FILE_CONTENT::INCLUDE] = new FILE_INFO(tmp.data(), tmp.size());
 
         tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::SRC, basePath);
-        Utils::StringReplace(tmp, "<NAME>", lib->name);
+        tmp = Utils::StringReplace(tmp, "<NAME>", lib->name);
         lib->fileContents[FILE_CONTENT::SRC] = new FILE_INFO(tmp.data(), tmp.size());
 
         m_projects.push_back(lib);
