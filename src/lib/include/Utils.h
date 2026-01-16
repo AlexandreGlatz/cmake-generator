@@ -9,6 +9,7 @@ public:
     static std::string StringReplace(std::string base, std::string tag, std::string replacement);
     static std::string GetTemplate(FolderManager::FILE_CONTENT templateType);
     static std::string Parse(std::string path);
+    static std::string ToUpper(std::string const& pStr);
 };
 
 #endif

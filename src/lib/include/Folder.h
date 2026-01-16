@@ -6,7 +6,7 @@
 class File;
 class Folder {
 public:
-    Folder(std::string path, std::string root);
+    Folder(std::string path);
     ~Folder();
 
     Folder* CreateSubfolder(std::string name);

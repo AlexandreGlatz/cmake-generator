@@ -19,27 +19,37 @@ public:
     struct FILE_INFO {
         char* content;
         int size;
+
+        FILE_INFO(char* _content, int _size)
+        {
+            content = _content, size = _size;
+        }
     };
 
     struct PROJECT {
         std::string name;
         std::map<FILE_CONTENT, FILE_INFO*> fileContents;
+
+        PROJECT()
+        {
+            name = "";
+        }
     };
 
-    void CreateArchitecture(std::string root);
+    void CreateArchitecture();
     void GenerateContents(char** projectNames, int size);
 
     FolderManager(FolderManager& other) = delete;
     void operator=(const FolderManager& value) = delete;
 
-    FolderManager* GetInstance();
+    static FolderManager* GetInstance();
 private: 
 
     FolderManager();
     static FolderManager* m_instance;
 
-    static void _GenerateAppProject(char* name);
-    static void _GenerateLibProject(char* name);
+    void _GenerateAppProject(char* name);
+    void _GenerateLibProject(char* name);
 
     std::vector<PROJECT*> m_projects;
     int m_projectsAmount;

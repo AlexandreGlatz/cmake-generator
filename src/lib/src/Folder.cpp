@@ -2,22 +2,26 @@
 #include <filesystem>
 #include "File.h"
 
-Folder::Folder(std::string path, std::string root) :
+Folder::Folder(std::string path) :
     m_path(path),
-    m_root(root)
+    m_root(std::filesystem::current_path())
 {
+    m_root += "/";
     _Create();
+}
+
+Folder::~Folder()
+{
 }
 
 void Folder::_Create()
 {
-    std::filesystem::current_path(m_root);
-    std::filesystem::create_directory(m_path);
+    std::filesystem::create_directory(m_root + m_path);
 }
 
 Folder* Folder::CreateSubfolder(std::string name)
 {
-    Folder* newFolder = new Folder(m_root + m_path, name);
+    Folder* newFolder = new Folder(m_path + name);
     return newFolder;
 }
 

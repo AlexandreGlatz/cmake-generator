@@ -1,6 +1,8 @@
-#include <iostream>
-
+#include "FolderManager.h"
+#include <filesystem>
 int main(int argc, char* argv[])
 {
-    std::cout<<"Hello World"<<std::endl;
+    FolderManager* pFolderManager = FolderManager::GetInstance();
+    pFolderManager->GenerateContents(argv, argc);
+    pFolderManager->CreateArchitecture();
 }

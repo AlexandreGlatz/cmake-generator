@@ -1,7 +1,10 @@
 #include "FolderManager.h"
 #include "Folder.h"
 #include "File.h"
+#include "Utils.h"
+#include <iostream>
 
+FolderManager* FolderManager::m_instance;
 FolderManager::FolderManager()
 {}
 
@@ -14,16 +17,16 @@ FolderManager* FolderManager::GetInstance()
     return m_instance;
 }
 
-void FolderManager::CreateArchitecture(std::string root)
+void FolderManager::CreateArchitecture()
 {
-    File cmakeGen(root + "CMakeLists.txt", 
+    File cmakeGen("CMakeLists.txt", 
             m_projects[0]->fileContents[FILE_CONTENT::CMAKE_GEN]->content, 
             m_projects[0]->fileContents[FILE_CONTENT::CMAKE_GEN]->size);
-    Folder build(root, "build/");
-    Folder resources(root, "res/");
+    Folder build("build/");
+    Folder resources("res/");
     
     { //app
-        Folder app(root, "app/");
+        Folder app("app/");
         app.CreateSubFile("CMakeLists.txt", 
                 m_projects[1]->fileContents[FILE_CONTENT::CMAKE_APP]->content,
                 m_projects[1]->fileContents[FILE_CONTENT::CMAKE_APP]->size);
@@ -34,11 +37,12 @@ void FolderManager::CreateArchitecture(std::string root)
                 m_projects[1]->fileContents[FILE_CONTENT::MAIN]->size);
     }
 
-    for(int i = 2; i<m_projectsAmount; ++i)
+    for(int i = 2; i<m_projects.size(); ++i)
     { //lib
-        Folder lib(root, "lib/");
+        Folder lib(m_projects[i]->name + "/");
         lib.CreateSubFile("CMakeLists.txt", 
-                m_projects[i]->fileContents[FILE_CONTENT::CMAKE_LIB]->content, m_projects[i]->fileContents[FILE_CONTENT::CMAKE_LIB]->size);
+                m_projects[i]->fileContents[FILE_CONTENT::CMAKE_LIB]->content,
+                m_projects[i]->fileContents[FILE_CONTENT::CMAKE_LIB]->size);
 
         Folder* libSrc = lib.CreateSubfolder("src/");
         libSrc->CreateSubFile(m_projects[i]->name + ".cpp", 
@@ -55,11 +59,45 @@ void FolderManager::CreateArchitecture(std::string root)
 
 void FolderManager::GenerateContents(char **projectNames, int size)
 {
-    PROJECT* root = m_projects[0];
-    m_projects[0]->name = projectNames[0]; 
+    PROJECT* root = new PROJECT();
+    root->name = projectNames[1];
+    // TODO Turn this into a function
+    std::string tmp = Utils::GetTemplate(FILE_CONTENT::CMAKE_GEN);
+    Utils::StringReplace(tmp, "<NAME>", projectNames[1]);
+    root->fileContents[FILE_CONTENT::CMAKE_GEN] = new FILE_INFO(tmp.data(), tmp.size());
+    //
+    m_projects.push_back(root);
+
+    PROJECT* app = new PROJECT();
+    app->name = projectNames[2];
+    tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::CMAKE_APP);
+    Utils::StringReplace(tmp, "<NAME>", projectNames[2]);
+    app->fileContents[FILE_CONTENT::CMAKE_APP] = new FILE_INFO(tmp.data(), tmp.size());
+
+    tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::MAIN);
+    app->fileContents[FILE_CONTENT::MAIN] = new FILE_INFO(tmp.data(), tmp.size());
     
-    for(int i = 2; i<size; ++i)
+    m_projects.push_back(app);
+    for(int i = 3; i < size - 2; ++i)
     {
+        PROJECT* lib = new PROJECT();
+        lib->name = projectNames[i];
+        tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::CMAKE_LIB);
+        Utils::StringReplace(tmp, "<NAME>", projectNames[i]);
+        lib->fileContents[FILE_CONTENT::CMAKE_LIB] = new FILE_INFO(tmp.data(), tmp.size());
+
+        tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::INCLUDE);
+        Utils::StringReplace(tmp, "<NAME_INCLUDE>", Utils::ToUpper(lib->name));
+        Utils::StringReplace(tmp, "<NAME>", projectNames[i]);
+        lib->fileContents[FILE_CONTENT::INCLUDE] = new FILE_INFO(tmp.data(), tmp.size());
+
+        tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::SRC);
+        Utils::StringReplace(tmp, "<NAME>", projectNames[i]);
+        lib->fileContents[FILE_CONTENT::SRC] = new FILE_INFO(tmp.data(), tmp.size());
+
+        m_projects.push_back(lib);
         
-    }
+    };
+
+    std::cout<<"success"<<std::endl;
 }
