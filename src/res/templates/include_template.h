@@ -6,5 +6,5 @@ public:
     <NAME>();
     ~<NAME>();
 
-}
+};
 #endif

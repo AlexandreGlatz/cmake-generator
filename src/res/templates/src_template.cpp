@@ -1,1 +1,1 @@
-#include "<NAME>.cpp"
+#include "<NAME>.h"
