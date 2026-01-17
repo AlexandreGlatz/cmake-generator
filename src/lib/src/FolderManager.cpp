@@ -19,6 +19,8 @@ FolderManager* FolderManager::GetInstance()
 
 void FolderManager::CreateArchitecture()
 {
+
+    std::cout<<m_projects[0]->fileContents[FILE_CONTENT::CMAKE_GEN]->content<<std::endl;
     File cmakeGen("CMakeLists.txt", 
             m_projects[0]->fileContents[FILE_CONTENT::CMAKE_GEN]->content, 
             m_projects[0]->fileContents[FILE_CONTENT::CMAKE_GEN]->size);
@@ -67,19 +69,18 @@ void FolderManager::GenerateContents(char **projectNames, int size)
     // TODO Turn this into a function
     std::string tmp = Utils::GetTemplate(FILE_CONTENT::CMAKE_GEN, basePath);
     tmp = Utils::StringReplace(tmp, "<NAME>", projectNames[1]);
-    std::cout<<tmp<<std::endl;
     root->fileContents[FILE_CONTENT::CMAKE_GEN] = new FILE_INFO(tmp.data(), tmp.size());
     //
     m_projects.push_back(root);
 
     PROJECT* app = new PROJECT();
     app->name = projectNames[2];
-    tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::CMAKE_APP, basePath);
-    tmp = Utils::StringReplace(tmp, "<NAME>", projectNames[2]);
-    app->fileContents[FILE_CONTENT::CMAKE_APP] = new FILE_INFO(tmp.data(), tmp.size());
+    std::string tmp1 = Utils::GetTemplate(FolderManager::FILE_CONTENT::CMAKE_APP, basePath);
+    tmp1 = Utils::StringReplace(tmp1, "<NAME>", projectNames[2]);
+    app->fileContents[FILE_CONTENT::CMAKE_APP] = new FILE_INFO(tmp1.data(), tmp1.size());
 
-    tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::MAIN, basePath);
-    app->fileContents[FILE_CONTENT::MAIN] = new FILE_INFO(tmp.data(), tmp.size());
+    std::string tmp2 = Utils::GetTemplate(FolderManager::FILE_CONTENT::MAIN, basePath);
+    app->fileContents[FILE_CONTENT::MAIN] = new FILE_INFO(tmp2.data(), tmp2.size());
     
     m_projects.push_back(app);
 
@@ -87,18 +88,18 @@ void FolderManager::GenerateContents(char **projectNames, int size)
     {
         PROJECT* lib = new PROJECT();
         lib->name = projectNames[i];
-        tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::CMAKE_LIB, basePath);
-        tmp = Utils::StringReplace(tmp, "<NAME>", lib->name);
-        lib->fileContents[FILE_CONTENT::CMAKE_LIB] = new FILE_INFO(tmp.data(), tmp.size());
+        std::string tmp3 = Utils::GetTemplate(FolderManager::FILE_CONTENT::CMAKE_LIB, basePath);
+        tmp = Utils::StringReplace(tmp3, "<NAME>", lib->name);
+        lib->fileContents[FILE_CONTENT::CMAKE_LIB] = new FILE_INFO(tmp3.data(), tmp3.size());
 
-        tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::INCLUDE, basePath);
-        tmp = Utils::StringReplace(tmp, "<NAME_INCLUDE>", Utils::ToUpper(lib->name));
-        tmp = Utils::StringReplace(tmp, "<NAME>", lib->name);
-        lib->fileContents[FILE_CONTENT::INCLUDE] = new FILE_INFO(tmp.data(), tmp.size());
+        std::string tmp4 = Utils::GetTemplate(FolderManager::FILE_CONTENT::INCLUDE, basePath);
+        tmp4 = Utils::StringReplace(tmp4, "<NAME_INCLUDE>", Utils::ToUpper(lib->name));
+        tmp4 = Utils::StringReplace(tmp4, "<NAME>", lib->name);
+        lib->fileContents[FILE_CONTENT::INCLUDE] = new FILE_INFO(tmp4.data(), tmp4.size());
 
-        tmp = Utils::GetTemplate(FolderManager::FILE_CONTENT::SRC, basePath);
-        tmp = Utils::StringReplace(tmp, "<NAME>", lib->name);
-        lib->fileContents[FILE_CONTENT::SRC] = new FILE_INFO(tmp.data(), tmp.size());
+        std::string tmp5 = Utils::GetTemplate(FolderManager::FILE_CONTENT::SRC, basePath);
+        tmp5 = Utils::StringReplace(tmp5, "<NAME>", lib->name);
+        lib->fileContents[FILE_CONTENT::SRC] = new FILE_INFO(tmp5.data(), tmp5.size());
 
         m_projects.push_back(lib);
         

@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <cstring>
 
 class FolderManager {
 public:
@@ -22,7 +23,9 @@ public:
 
         FILE_INFO(char* _content, int _size)
         {
-            content = _content, size = _size;
+            content = new char[_size];
+            std::memcpy(content, _content, _size);
+            size = _size;
         }
     };
 
