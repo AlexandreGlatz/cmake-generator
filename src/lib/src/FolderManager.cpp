@@ -61,26 +61,22 @@ void FolderManager::CreateArchitecture()
 
 void FolderManager::GenerateContents(char **projectNames, int size)
 {
-    std::string base(projectNames[0]);
-    std::string basePath = base.substr(0, base.find_last_of("/"));
-            
+    m_executablePath = projectNames[0];
+
     PROJECT* root = new PROJECT();
     root->name = projectNames[1];
-    // TODO Turn this into a function
-    std::string tmp = Utils::GetTemplate(FILE_CONTENT::CMAKE_GEN, basePath);
-    tmp = Utils::StringReplace(tmp, "<NAME>", projectNames[1]);
-    root->fileContents[FILE_CONTENT::CMAKE_GEN] = new FILE_INFO(tmp.data(), tmp.size());
-    //
+
+    std::map<std::string, std::string> replacement = {{"<NAME>", root->name}};
+    _CreateFile(root, FolderManager::FILE_CONTENT::CMAKE_GEN, replacement);
+
     m_projects.push_back(root);
 
     PROJECT* app = new PROJECT();
     app->name = projectNames[2];
-    std::string tmp1 = Utils::GetTemplate(FolderManager::FILE_CONTENT::CMAKE_APP, basePath);
-    tmp1 = Utils::StringReplace(tmp1, "<NAME>", projectNames[2]);
-    app->fileContents[FILE_CONTENT::CMAKE_APP] = new FILE_INFO(tmp1.data(), tmp1.size());
+    std::map<std::string, std::string> replacementApp = {{"<NAME>", app->name}};
 
-    std::string tmp2 = Utils::GetTemplate(FolderManager::FILE_CONTENT::MAIN, basePath);
-    app->fileContents[FILE_CONTENT::MAIN] = new FILE_INFO(tmp2.data(), tmp2.size());
+    _CreateFile(app, FolderManager::FILE_CONTENT::CMAKE_APP, replacement);
+    _CreateFile(app, FolderManager::FILE_CONTENT::MAIN);
     
     m_projects.push_back(app);
 
@@ -88,22 +84,30 @@ void FolderManager::GenerateContents(char **projectNames, int size)
     {
         PROJECT* lib = new PROJECT();
         lib->name = projectNames[i];
-        std::string tmp3 = Utils::GetTemplate(FolderManager::FILE_CONTENT::CMAKE_LIB, basePath);
-        tmp = Utils::StringReplace(tmp3, "<NAME>", lib->name);
-        lib->fileContents[FILE_CONTENT::CMAKE_LIB] = new FILE_INFO(tmp3.data(), tmp3.size());
+        std::map<std::string, std::string> replacementLib = {{"<NAME>", lib->name}};
 
-        std::string tmp4 = Utils::GetTemplate(FolderManager::FILE_CONTENT::INCLUDE, basePath);
-        tmp4 = Utils::StringReplace(tmp4, "<NAME_INCLUDE>", Utils::ToUpper(lib->name));
-        tmp4 = Utils::StringReplace(tmp4, "<NAME>", lib->name);
-        lib->fileContents[FILE_CONTENT::INCLUDE] = new FILE_INFO(tmp4.data(), tmp4.size());
+        _CreateFile(lib, FolderManager::FILE_CONTENT::CMAKE_LIB, replacementLib);
+        _CreateFile(lib, FolderManager::FILE_CONTENT::SRC, replacementLib);
 
-        std::string tmp5 = Utils::GetTemplate(FolderManager::FILE_CONTENT::SRC, basePath);
-        tmp5 = Utils::StringReplace(tmp5, "<NAME>", lib->name);
-        lib->fileContents[FILE_CONTENT::SRC] = new FILE_INFO(tmp5.data(), tmp5.size());
+        replacementLib["<NAME_INCLUDE>"] = Utils::ToUpper(lib->name);
+        _CreateFile(lib, FolderManager::FILE_CONTENT::INCLUDE, replacementLib);
 
         m_projects.push_back(lib);
-        
     };
 
     std::cout<<"success"<<std::endl;
 }
+void FolderManager::_CreateFile(PROJECT* pProject, FILE_CONTENT type, std::map<std::string, std::string> replacements)
+{    
+    std::string base(m_executablePath);
+    std::string basePath = base.substr(0, base.find_last_of("/"));
+            
+    std::string tmp = Utils::GetTemplate(type, basePath);
+    for(auto const& [key, val] : replacements)
+    {
+        tmp = Utils::StringReplace(tmp, key, val);
+    }
+    pProject->fileContents[type] = new FILE_INFO(tmp.data(), tmp.size());
+
+}
+

@@ -32,6 +32,7 @@ public:
     struct PROJECT {
         std::string name;
         std::map<FILE_CONTENT, FILE_INFO*> fileContents;
+        std::vector<PROJECT*> dependencies;
 
         PROJECT()
         {
@@ -51,10 +52,10 @@ private:
     FolderManager();
     static FolderManager* m_instance;
 
-    void _GenerateAppProject(char* name);
-    void _GenerateLibProject(char* name);
+    void _CreateFile(PROJECT* pProject, FILE_CONTENT type, std::map<std::string, std::string> replacements = {});
 
     std::vector<PROJECT*> m_projects;
+    std::string m_executablePath;
     int m_projectsAmount;
 };
 #endif
