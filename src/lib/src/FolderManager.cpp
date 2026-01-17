@@ -75,7 +75,7 @@ void FolderManager::GenerateContents(char **projectNames, int size)
     app->name = projectNames[2];
     std::map<std::string, std::string> replacementApp = {{"<NAME>", app->name}};
 
-    _CreateFile(app, FolderManager::FILE_CONTENT::CMAKE_APP, replacement);
+    _CreateFile(app, FolderManager::FILE_CONTENT::CMAKE_APP, replacementApp);
     _CreateFile(app, FolderManager::FILE_CONTENT::MAIN);
     
     m_projects.push_back(app);
