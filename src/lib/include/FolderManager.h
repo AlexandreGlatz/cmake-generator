@@ -32,7 +32,7 @@ public:
     struct PROJECT {
         std::string name;
         std::map<FILE_CONTENT, FILE_INFO*> fileContents;
-        std::vector<PROJECT*> dependencies;
+        std::vector<char*> dependencies;
 
         PROJECT()
         {
@@ -41,7 +41,7 @@ public:
     };
 
     void CreateArchitecture();
-    void GenerateContents(char** projectNames, int size);
+    void GenerateContents(std::map<char*, std::vector<char*>> dependenciesPerProjects, int size);
 
     FolderManager(FolderManager& other) = delete;
     void operator=(const FolderManager& value) = delete;

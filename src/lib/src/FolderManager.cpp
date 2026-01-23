@@ -59,7 +59,7 @@ void FolderManager::CreateArchitecture()
     
 }
 
-void FolderManager::GenerateContents(char **projectNames, int size)
+void FolderManager::GenerateContents(std::map<char*, std::vector<char*>> projectNames, int size)
 {
     m_executablePath = projectNames[0];
 
