@@ -7,3 +7,4 @@ You can choose your project's name at creation.
 ## Usage
 
 ### Linux
+```cmake-genrator -r name -a app dependencies -l lib dependencies```
