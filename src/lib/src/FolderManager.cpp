@@ -22,7 +22,6 @@ FolderManager* FolderManager::GetInstance()
 void FolderManager::CreateArchitecture()
 {
 
-    //std::cout<<m_projects[0]->fileContents[FILE_CONTENT::CMAKE_GEN]->content<<std::endl;
     File cmakeGen("CMakeLists.txt", 
             m_projects[0]->fileContents[FILE_CONTENT::CMAKE_GEN]->content, 
             m_projects[0]->fileContents[FILE_CONTENT::CMAKE_GEN]->size);
@@ -88,7 +87,6 @@ void FolderManager::GenerateContents(Settings const& settings)
     {
         appDependenciesStr << "target_link_libraries(${PROJECT_NAME} PRIVATE " << name <<"::library)" << std::endl;
     }
-    std::cout<<appDependenciesStr.str();
     std::map<std::string, std::string> replacementApp = {{"<NAME>", app->name}, {"<DEPENDENCIES>", appDependenciesStr.str()}};
 
     _CreateFile(app, FolderManager::FILE_CONTENT::CMAKE_APP, replacementApp);
