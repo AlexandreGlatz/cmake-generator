@@ -2,7 +2,9 @@
 #include "Folder.h"
 #include "File.h"
 #include "Utils.h"
+#include "Settings.h"
 #include <iostream>
+#include <sstream>
 
 FolderManager* FolderManager::m_instance;
 FolderManager::FolderManager()
@@ -20,7 +22,7 @@ FolderManager* FolderManager::GetInstance()
 void FolderManager::CreateArchitecture()
 {
 
-    std::cout<<m_projects[0]->fileContents[FILE_CONTENT::CMAKE_GEN]->content<<std::endl;
+    //std::cout<<m_projects[0]->fileContents[FILE_CONTENT::CMAKE_GEN]->content<<std::endl;
     File cmakeGen("CMakeLists.txt", 
             m_projects[0]->fileContents[FILE_CONTENT::CMAKE_GEN]->content, 
             m_projects[0]->fileContents[FILE_CONTENT::CMAKE_GEN]->size);
@@ -28,7 +30,7 @@ void FolderManager::CreateArchitecture()
     Folder resources("res/");
     
     { //app
-        Folder app("app/");
+        Folder app(m_projects[1]->name + "/");
         app.CreateSubFile("CMakeLists.txt", 
                 m_projects[1]->fileContents[FILE_CONTENT::CMAKE_APP]->content,
                 m_projects[1]->fileContents[FILE_CONTENT::CMAKE_APP]->size);
@@ -59,32 +61,56 @@ void FolderManager::CreateArchitecture()
     
 }
 
-void FolderManager::GenerateContents(std::map<char*, std::vector<char*>> projectNames, int size)
+void FolderManager::GenerateContents(Settings const& settings)
 {
-    m_executablePath = projectNames[0];
-
+    m_executablePath = settings.GetExecutable();
+    std::map<const char*, std::vector<const char*>> projectDependencies = settings.GetProjectDependencies();
     PROJECT* root = new PROJECT();
-    root->name = projectNames[1];
+    root->name = settings.GetRootName();
 
-    std::map<std::string, std::string> replacement = {{"<NAME>", root->name}};
+    std::stringstream rootSubdirStr;
+    for(auto const& [key, value] : projectDependencies)
+    {
+        rootSubdirStr << "add_subdirectory(" << key << ")" << std::endl;
+    }
+
+    std::map<std::string, std::string> replacement = {{"<NAME>", root->name}, {"<SUBDIR>", rootSubdirStr.str()}};
     _CreateFile(root, FolderManager::FILE_CONTENT::CMAKE_GEN, replacement);
 
     m_projects.push_back(root);
 
     PROJECT* app = new PROJECT();
-    app->name = projectNames[2];
-    std::map<std::string, std::string> replacementApp = {{"<NAME>", app->name}};
+    app->name = settings.GetAppName();
+    std::stringstream appDependenciesStr;
+    std::vector<const char*> appDependencies = projectDependencies[settings.GetAppName()];
+
+    for(const char* name : appDependencies)
+    {
+        appDependenciesStr << "target_link_libraries(${PROJECT_NAME} PRIVATE " << name <<"::library)" << std::endl;
+    }
+    std::cout<<appDependenciesStr.str();
+    std::map<std::string, std::string> replacementApp = {{"<NAME>", app->name}, {"<DEPENDENCIES>", appDependenciesStr.str()}};
 
     _CreateFile(app, FolderManager::FILE_CONTENT::CMAKE_APP, replacementApp);
     _CreateFile(app, FolderManager::FILE_CONTENT::MAIN);
     
     m_projects.push_back(app);
 
-    for(int i = 3; i < size; ++i)
+    for(auto const& [key, val] : projectDependencies)
     {
+        if(key == app->name)
+            continue;
+
         PROJECT* lib = new PROJECT();
-        lib->name = projectNames[i];
-        std::map<std::string, std::string> replacementLib = {{"<NAME>", lib->name}};
+        lib->name = key;
+
+        std::stringstream libDependenciesStr;
+
+        for(const char* name : val)
+        {
+            libDependenciesStr << "target_link_libraries(${PROJECT_NAME} PRIVATE " << name <<"::library)" << std::endl;
+        }
+        std::map<std::string, std::string> replacementLib = {{"<NAME>", lib->name}, {"<DEPENDENCIES>", libDependenciesStr.str()}};
 
         _CreateFile(lib, FolderManager::FILE_CONTENT::CMAKE_LIB, replacementLib);
         _CreateFile(lib, FolderManager::FILE_CONTENT::SRC, replacementLib);
@@ -97,6 +123,7 @@ void FolderManager::GenerateContents(std::map<char*, std::vector<char*>> project
 
     std::cout<<"success"<<std::endl;
 }
+
 void FolderManager::_CreateFile(PROJECT* pProject, FILE_CONTENT type, std::map<std::string, std::string> replacements)
 {    
     std::string base(m_executablePath);

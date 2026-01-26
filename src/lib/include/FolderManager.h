@@ -5,6 +5,7 @@
 #include <vector>
 #include <cstring>
 
+class Settings;
 class FolderManager {
 public:
     enum FILE_CONTENT {
@@ -41,7 +42,7 @@ public:
     };
 
     void CreateArchitecture();
-    void GenerateContents(std::map<char*, std::vector<char*>> dependenciesPerProjects, int size);
+    void GenerateContents(Settings const& settings);
 
     FolderManager(FolderManager& other) = delete;
     void operator=(const FolderManager& value) = delete;
