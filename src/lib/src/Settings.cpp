@@ -11,7 +11,6 @@ Settings::Settings(int argc, char** argv):
 
 Settings::~Settings()
 {
-
 }
 
 void Settings::Parse()
@@ -36,15 +35,12 @@ void Settings::Parse()
 
         else if(strcmp(m_argv[i], "-a") == 0 || strcmp(m_argv[i], "--app") == 0)
         {
-            std::vector<const char*> dependencies = _GetDependencies(m_argc, m_argv, i);
-            m_projectDependencies[m_argv[i + 1]] = dependencies;
-            i += dependencies.size() + 1;
+            m_appName = m_argv[i + 1];
+            _CreateDependencies(i);
         }
         else if(strcmp(m_argv[i], "-l") == 0 || strcmp(m_argv[i], "--lib") == 0)
         {
-            std::vector<const char*> dependencies = _GetDependencies(m_argc, m_argv, i);
-            m_projectDependencies[m_argv[i + 1]] = dependencies;
-            i += dependencies.size() + 1;
+            _CreateDependencies(i);
         }
         else
         {
@@ -53,20 +49,23 @@ void Settings::Parse()
     }
 }
 
-std::vector<const char*> Settings::_GetDependencies(int argc, char** argv, int index)
+void Settings::_CreateDependencies(int& index)
 {
-    
-    std::vector<const char*> dependencies;
     int argument = 2;
-    if(index + argument >= argc)
-        return dependencies;
 
-    while(argv[index + argument][0] != '-' && index + argument < argc)
+    m_projectDependencies[m_argv[index + 1]] = {};
+    if(index + argument >= m_argc)
     {
-        std::cout<<argv[index + argument]<<std::endl;
-        dependencies.push_back(argv[index + argument]);
+        index += 1;
+        return;
+    }
+
+    while(m_argv[index + argument][0] != '-' && index + argument < m_argc)
+    {
+        std::cout<<m_argv[index + 1]<<std::endl;
+        m_projectDependencies[m_argv[index + 1]].push_back(m_argv[index + argument]);
         argument++;
     }
 
-    return dependencies;
+    index += argument - 1;
 }
